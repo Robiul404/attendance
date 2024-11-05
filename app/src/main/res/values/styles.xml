@@ -1,0 +1,7 @@
+<resources>
+    <!-- Custom style for menu items -->
+    <style name="CustomMenuStyle" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:background">#FF5733</item> <!-- Change to your desired color -->
+        <item name="android:textColor">#FFFFFF</item>  <!-- Optional: set text color -->
+    </style>
+</resources>

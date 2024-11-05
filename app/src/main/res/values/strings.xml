@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Attendance</string>
+    <string name="fab_content_description">Create New Item</string>
+</resources>

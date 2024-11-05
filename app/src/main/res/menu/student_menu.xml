@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/add_student"
+        android:title="Add Student"
+        app:showAsAction="collapseActionView"
+        android:icon="@drawable/baseline_add_24"
+        android:iconTint="#FFFFFF"
+        />
+    <item
+        android:id="@+id/add_doc"
+        android:title="Upload Doc File"
+        android:icon="@drawable/upload_file"
+        app:showAsAction="collapseActionView"
+        android:iconTint="#FFFFFF"
+        />
+</menu>
