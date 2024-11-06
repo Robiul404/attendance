@@ -1,5 +1,6 @@
 package com.example.attendance
 
+import StudentItem
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -7,29 +8,29 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
 
 class StudentActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
-
-    private var courseName: String = ""
-    private var sectionName: String = ""
-    private var position: Int = 0
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: studentAdapter
     private lateinit var layoutManager: RecyclerView.LayoutManager
-    private var studentitems: ArrayList<StudentItem> = ArrayList()
-
+    private var studentItems: ArrayList<StudentItem> = ArrayList()
+    private lateinit var classroomRef: CollectionReference
+    private lateinit var teacherEmail: String
+    private var courseName: String = ""
+    private var sectionName: String = ""
+    private var position: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_student)
 
-
-        // Initialize the toolbar
+        // Toolbar setup
         toolbar = findViewById(R.id.toolbar12) ?: throw IllegalStateException("Toolbar not found")
         setSupportActionBar(toolbar)
         toolbar.setPopupTheme(R.style.CustomMenuStyle)
@@ -39,42 +40,47 @@ class StudentActivity : AppCompatActivity() {
         sectionName = intent.getStringExtra("SectionName").orEmpty()
         position = intent.getIntExtra("Position", -1)
 
-        setToolbar()
+        // Firebase reference setup
+        teacherEmail = FirebaseAuth.getInstance().currentUser?.email.toString()
+        classroomRef = FirestoreHelper.getClassroomRef(teacherEmail)
+            .document("$courseName-$sectionName")
+            .collection("students")
+
+        // RecyclerView setup
         recyclerView = findViewById(R.id.recyclerview2)
-        recyclerView.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(this)
         recyclerView.layoutManager = layoutManager
-        adapter = studentAdapter(this, studentitems)
-        adapter.setOnItemClickListener(object : studentAdapter.OnItemClickListener {
-            override fun onClick(position: Int) {
-                changeStatus(position) // Handle click
-            }
-        })
-
+        adapter = studentAdapter(this, studentItems)
         recyclerView.adapter = adapter
 
+        // Load students from Firebase
+        loadStudents()
+
+        // Set toolbar and item click listeners
+        setToolbar()
         adapter.setOnItemClickListener(object : studentAdapter.OnItemClickListener {
             override fun onClick(position: Int) {
                 changeStatus(position)
             }
         })
     }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.student_menu, menu)
-        return true // Ensures the menu is displayed
+        return true
     }
-
 
     private fun changeStatus(position: Int) {
-        studentitems[position].status=if (studentitems[position].status == "P") "A"
-        else "P"
+        // Toggle attendance status between "P" and "A"
+        studentItems[position].status = if (studentItems[position].status == "P") "A" else "P"
+        adapter.notifyItemChanged(position)
 
-        adapter.notifyItemChanged(position) // Notify the adapter to refresh the specific item
+        // Update attendance status in Firebase
+        classroomRef.document(studentItems[position].roll)
+            .update("status", studentItems[position].status)
     }
 
-
     private fun setToolbar() {
-        toolbar = findViewById(R.id.toolbar12)
         val title: TextView = toolbar.findViewById(R.id.title2)
         val subtitle: TextView = toolbar.findViewById(R.id.stitle2)
         val back: ImageButton = toolbar.findViewById(R.id.back)
@@ -87,16 +93,15 @@ class StudentActivity : AppCompatActivity() {
         }
 
         toolbar.setOnMenuItemClickListener { menuItem -> onMenuItemClick(menuItem) }
-
-
     }
 
     private fun onMenuItemClick(menuItem: MenuItem?): Boolean {
-        if (menuItem?.itemId== R.id.add_student) {
+        if (menuItem?.itemId == R.id.add_student) {
             showAddStudentDialog()
         }
         return false
     }
+
     private fun showAddStudentDialog() {
         val dialog = myDialog()
         dialog.setListener(object : myDialog.OnClickListener {
@@ -107,15 +112,26 @@ class StudentActivity : AppCompatActivity() {
         dialog.show(supportFragmentManager, myDialog.STUDENT_ADD_DIALOG)
     }
 
-
     private fun addStudent(roll: String, name: String) {
-        studentitems.add(StudentItem(roll, name,""))
-        adapter.notifyDataSetChanged() // Notify that a new item was inserted
+        val newStudent = StudentItem(roll, name, "P")  // Default status as Present ("P")
+        studentItems.add(newStudent)
+        adapter.notifyDataSetChanged()
+
+        // Save the new student to Firebase
+        classroomRef.document(roll).set(newStudent.toMap())
     }
 
-
-
-
-
-
+    private fun loadStudents() {
+        // Retrieve student data from Firebase
+        classroomRef.get().addOnSuccessListener { querySnapshot ->
+            studentItems.clear()
+            for (document in querySnapshot) {
+                val roll = document.getString("roll") ?: ""
+                val name = document.getString("name") ?: ""
+                val status = document.getString("status") ?: "P"
+                studentItems.add(StudentItem(roll, name, status))
+            }
+            adapter.notifyDataSetChanged()
+        }
+    }
 }
