@@ -1,13 +1,20 @@
 package com.example.attendance
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.attendance.myDialog.Companion.CLASS_ADD_DIALOG
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,8 +22,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var classAdapter: ClassAdapter
     private lateinit var layoutManager: RecyclerView.LayoutManager
+    private lateinit var logoutBtn: ImageButton
+    private val db= FirebaseFirestore.getInstance()
     private var classItems: ArrayList<ClassItem> = ArrayList()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -36,8 +44,31 @@ class MainActivity : AppCompatActivity() {
                 gotoItemActivity(position)
             }
         })
-    }
 
+        logoutBtn= findViewById(R.id.logout)
+        logoutBtn.setOnClickListener{
+            showLogout()
+        }
+    }
+    private fun showLogout(){
+        val builder= AlertDialog.Builder(this)
+        builder.setTitle("Confirm Logout")
+        builder.setMessage("Do you want to logout?")
+        builder.setPositiveButton("Yes"){ _:DialogInterface, _: Int ->
+            FirebaseAuth.getInstance().signOut()
+            val intent = Intent(this, Login::class.java)
+            intent.flags= Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+            Toast.makeText(this, "Logged Out", Toast.LENGTH_SHORT).show()
+        }
+        builder.setNegativeButton("No"){ dialog:DialogInterface, _: Int ->
+            dialog.dismiss()
+        }
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+
+
+    }
     private fun gotoItemActivity(position: Int) {
         val intent = Intent(this, StudentActivity::class.java)
         intent.putExtra("CourseName", classItems[position].crsName)

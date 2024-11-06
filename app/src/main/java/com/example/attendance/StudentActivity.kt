@@ -10,6 +10,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 
 class StudentActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
@@ -22,6 +23,7 @@ class StudentActivity : AppCompatActivity() {
     private lateinit var layoutManager: RecyclerView.LayoutManager
     private var studentitems: ArrayList<StudentItem> = ArrayList()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_student)
@@ -29,7 +31,6 @@ class StudentActivity : AppCompatActivity() {
 
         // Initialize the toolbar
         toolbar = findViewById(R.id.toolbar12) ?: throw IllegalStateException("Toolbar not found")
-
         setSupportActionBar(toolbar)
         toolbar.setPopupTheme(R.style.CustomMenuStyle)
 

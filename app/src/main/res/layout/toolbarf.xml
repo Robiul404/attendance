@@ -5,32 +5,31 @@
     android:background="#000059"
 
     >
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-
         android:isScrollContainer="true"
-        >
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
 
-            />
+        android:padding="16dp">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Attendance XX"
-            android:textColor="#FFFFFF"
             android:layout_centerInParent="true"
-            android:textSize="20dp"
-            />
-        <TextView
+            android:text="Attendance"
+            android:textColor="#FFFFFF"
+            android:textSize="25dp" />
+
+        <ImageButton
+            android:id="@+id/logout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:textSize="20dp"
-            />
+            android:padding="10px"
+            android:background="@color/transparent"
+            android:src="@drawable/logoutbb"
+            android:textSize="20dp" />
 
     </RelativeLayout>
 

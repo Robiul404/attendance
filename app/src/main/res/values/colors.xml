@@ -5,4 +5,5 @@
     <color name="present">#07F4DD</color>
     <color name="absent">#FF0056</color>
     <color name="normal">#FFFFFF</color>
+    <color name="transparent">#00FFFFFF</color>
 </resources>
