@@ -1,7 +1,7 @@
 package com.example.attendance
 
+import StudentItem
 import android.content.Context
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
