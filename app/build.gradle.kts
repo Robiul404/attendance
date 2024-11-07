@@ -53,6 +53,13 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    //implementation(com.google.android.material:material:1.6.1)
+    implementation("org.apache.poi:poi-ooxml:5.2.3")
+    implementation("com.google.android.material:material:1.6.1")
+    implementation(platform("com.google.firebase:firebase-bom:32.1.1"))
+
+    // Firebase Authentication - KTX (comes with the BOM)
+    // Firebase Firestore
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
 
 }

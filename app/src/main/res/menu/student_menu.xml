@@ -9,7 +9,13 @@
         android:iconTint="#FFFFFF"
         />
     <item
-        android:id="@+id/see_att"
+        android:id="@+id/upload_excel_btn"
+        android:title="Upload Excel"
+        app:showAsAction="collapseActionView"
+        android:iconTint="#FFFFFF"/>
+
+    <item
+        android:id="@+id/see_attendance"
         android:title="See Attendance"
         app:showAsAction="collapseActionView"
         android:iconTint="#FFFFFF"
