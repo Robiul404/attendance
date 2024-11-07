@@ -120,7 +120,6 @@ class MainActivity : AppCompatActivity() {
         classItems.add(newClassItem)
         classAdapter.notifyDataSetChanged()
 
-        // Save the new class to Firestore
         val newClassroom = hashMapOf("Course Name" to crsName, "Section Name" to secName)
         val classroomId = "$crsName-$secName"
         classroomRef.document(classroomId).set(newClassroom).addOnSuccessListener {

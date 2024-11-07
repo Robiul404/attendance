@@ -9,10 +9,10 @@
         android:iconTint="#FFFFFF"
         />
     <item
-        android:id="@+id/add_doc"
-        android:title="Upload Doc File"
-        android:icon="@drawable/upload_file"
+        android:id="@+id/see_att"
+        android:title="See Attendance"
         app:showAsAction="collapseActionView"
         android:iconTint="#FFFFFF"
+        android:visible="true"
         />
 </menu>
