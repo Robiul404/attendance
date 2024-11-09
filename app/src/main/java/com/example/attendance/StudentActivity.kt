@@ -20,6 +20,7 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import java.io.InputStream
 import android.net.Uri
+import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.text.SimpleDateFormat
 import java.util.*
@@ -38,7 +39,6 @@ class StudentActivity : AppCompatActivity() {
     private val REQUEST_CODE_PICK_FILE = 1
     private var selectedDate: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-    // Firebase
     private val db = FirebaseFirestore.getInstance()
     private lateinit var studentRef: CollectionReference
     private lateinit var attendanceRef: CollectionReference
@@ -51,12 +51,10 @@ class StudentActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         toolbar.setPopupTheme(R.style.CustomMenuStyle)
 
-        // Get data from Intent
         courseName = intent.getStringExtra("CourseName").orEmpty()
         sectionName = intent.getStringExtra("SectionName").orEmpty()
         position = intent.getIntExtra("Position", -1)
 
-        // Firebase references
         val teacherEmail = FirebaseAuth.getInstance().currentUser?.email.toString()
         studentRef = db.collection("Teachers").document(teacherEmail)
             .collection("Classrooms").document("$courseName-$sectionName")
@@ -70,17 +68,10 @@ class StudentActivity : AppCompatActivity() {
         setupRecyclerView()
         loadStudents()
 
-        // Add attendance button click listener
-        cal = findViewById(R.id.cal_btn) // Update with your FloatingActionButton ID
+        cal = findViewById(R.id.cal_btn)
         cal.setOnClickListener { showDatePicker() }
     }
 
-
-    private fun pickExcelFile() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
-    }
 
     private fun setupRecyclerView() {
         recyclerView = findViewById(R.id.recyclerview2)
@@ -100,9 +91,9 @@ class StudentActivity : AppCompatActivity() {
         studentRef.get().addOnSuccessListener { querySnapshot ->
             studentitems.clear()
             for (document in querySnapshot) {
-                val roll = document.getString("roll") ?: "Unknown Roll"
-                val name = document.getString("name") ?: "Unknown Name"
-                val status = document.getString("status") ?: "A"
+                val roll = document.getString("roll") ?: ""
+                val name = document.getString("name") ?: ""
+                val status = document.getString("status") ?: ""
                 studentitems.add(StudentItem(roll, name, status))
             }
             adapter.notifyDataSetChanged()
@@ -113,7 +104,7 @@ class StudentActivity : AppCompatActivity() {
     }
 
     private fun saveStudents(roll: String, name: String) {
-        val student = hashMapOf("roll" to roll, "name" to name, "status" to "A")
+        val student = hashMapOf("roll" to roll, "name" to name, "status" to "P")
         studentRef.document(roll).set(student).addOnSuccessListener {
             Log.d("StudentActivity", "Student saved successfully")
         }.addOnFailureListener { e ->
@@ -123,22 +114,18 @@ class StudentActivity : AppCompatActivity() {
     }
 
     private fun showDatePicker() {
-        // Get the current date
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH)
         val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-        // Show the DatePickerDialog
         DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
-            // Date selected - format it
             selectedDate = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
             Toast.makeText(this, "Selected date: $selectedDate", Toast.LENGTH_SHORT).show()
         }, year, month, day).show()
     }
 
     private fun takeAttendance() {
-        // Use the selected date for marking attendance
         val attendanceData = studentitems.map {
             mapOf("roll" to it.roll, "name" to it.name, "status" to it.status)
         }
@@ -191,7 +178,6 @@ class StudentActivity : AppCompatActivity() {
                 return true
             }
             R.id.upload_excel_btn -> {
-                // Handle the Excel upload button click here
                 openFilePicker()
                 return true
             }
@@ -204,76 +190,36 @@ class StudentActivity : AppCompatActivity() {
         startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
     }
 
-
-    // Method to handle the result of the file picker
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_PICK_FILE && resultCode == RESULT_OK) {
             data?.data?.let { uri ->
-                // Use the uri to read and process the Excel file
                 importExcelData(uri)
             }
         }
     }
 
-    private fun readExcelFile(uri: Uri) {
-        try {
-            val inputStream = contentResolver.openInputStream(uri)
-            val workbook = WorkbookFactory.create(inputStream)
-            val sheet = workbook.getSheetAt(0)
-
-            for (row in sheet) {
-                val rollCell = row.getCell(0)  // Get the first cell (roll number)
-                val nameCell = row.getCell(1)  // Get the second cell (name)
-
-                // Convert roll number to String
-                val roll = when (rollCell?.cellType) {
-                    org.apache.poi.ss.usermodel.CellType.NUMERIC -> {
-                        // If the cell is a number, convert it to string without decimals
-                        rollCell.toString().split(".")[0] // Remove decimal part
-                    }
-                    org.apache.poi.ss.usermodel.CellType.STRING -> {
-                        // If the cell is already a string, just use it as is
-                        rollCell.toString()
-                    }
-                    else -> ""  // Default fallback
-                }
-
-                // Handle name cell, ensuring it's treated as a string
-                val name = nameCell?.toString() ?: ""
-
-                // Add each student item to the list and save to Firebase
-                studentitems.add(StudentItem(roll, name, ""))
-                saveStudents(roll, name)
-            }
-
-            adapter.notifyDataSetChanged()
-            Toast.makeText(this, "Excel file uploaded successfully", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Log.e("StudentActivity", "Error reading Excel file", e)
-            Toast.makeText(this, "Failed to read Excel file", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
-
-    // Method to import data from the Excel file
     private fun importExcelData(fileUri: Uri) {
         try {
             val inputStream: InputStream? = contentResolver.openInputStream(fileUri)
             val workbook = WorkbookFactory.create(inputStream)
-            val sheet = workbook.getSheetAt(0) // Get the first sheet
+            val sheet = workbook.getSheetAt(0)
 
             for (row in sheet) {
-                if (row.rowNum == 0) continue // Skip the header row
+                if (row.rowNum == 0) continue
 
-                val rollCell = row.getCell(0) // First column for roll
-                val nameCell = row.getCell(1) // Second column for name
+                val rollCell = row.getCell(0)
+                val nameCell = row.getCell(1)
 
-                val roll = rollCell?.toString()?.trim() ?: continue
+
+                val roll = if (rollCell != null && rollCell.cellType == CellType.NUMERIC) {
+                    rollCell.numericCellValue.toInt().toString()
+                } else {
+                    rollCell?.toString()?.trim() ?: continue
+                }
+
                 val name = nameCell?.toString()?.trim() ?: continue
 
-                // Add each student to the list
                 studentitems.add(StudentItem(roll, name, ""))
                 saveStudents(roll, name) // Save each student to Firebase
             }
@@ -292,7 +238,7 @@ class StudentActivity : AppCompatActivity() {
             override fun onClick(roll: String, name: String) {
                 studentitems.add(StudentItem(roll, name, ""))
                 adapter.notifyDataSetChanged()
-                saveStudents(roll, name) // Save student to Firebase
+                saveStudents(roll, name)
             }
         })
         dialog.show(supportFragmentManager, myDialog.STUDENT_ADD_DIALOG)

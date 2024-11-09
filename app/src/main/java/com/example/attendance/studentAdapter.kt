@@ -14,7 +14,7 @@ class studentAdapter(
     private val studentItems: List<StudentItem>
 ) : RecyclerView.Adapter<studentAdapter.StudentViewHolder>() {
 
-    private var onItemClickListener: OnItemClickListener? = null // Make this nullable
+    private var onItemClickListener: OnItemClickListener? = null
 
     interface OnItemClickListener {
         fun onClick(position: Int)
@@ -35,9 +35,9 @@ class studentAdapter(
             name.text = studentItem.name
             status.text = studentItem.status
             cardview= itemView.findViewById(R.id.card)
-            // Set click listener
+
             itemView.setOnClickListener {
-                listener?.onClick(adapterPosition) // Use adapterPosition for the current item
+                listener?.onClick(adapterPosition)
             }
         }
     }
@@ -51,7 +51,7 @@ class studentAdapter(
     override fun onBindViewHolder(holder: StudentViewHolder, position: Int) {
         val studentItem = studentItems[position]
         holder.bind(studentItem, onItemClickListener)
-        holder.cardview.setCardBackgroundColor(getColor(position)) // Should correctly change color
+        holder.cardview.setCardBackgroundColor(getColor(position))
     }
 
 

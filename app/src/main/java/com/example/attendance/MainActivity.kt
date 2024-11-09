@@ -40,11 +40,9 @@ class MainActivity : AppCompatActivity() {
         layoutManager = LinearLayoutManager(this)
         recyclerView.layoutManager = layoutManager
 
-        // Get teacher email for Firestore reference
         teacherEmail = FirebaseAuth.getInstance().currentUser?.email.toString()
         classroomRef = FirestoreHelper.getClassroomRef(teacherEmail)
 
-        // Initialize RecyclerView and adapter
         classAdapter = ClassAdapter(this, classItems)
         recyclerView.adapter = classAdapter
         classAdapter.setOnItemClickListener(object : ClassAdapter.OnItemClickListener {
@@ -58,20 +56,18 @@ class MainActivity : AppCompatActivity() {
             showLogout()
         }
 
-        // Load classrooms from Firebase
         loadClassrooms()
     }
 
     private fun loadClassrooms() {
-        // Fetch classrooms for the current teacher from Firestore
         classroomRef.get().addOnSuccessListener { querySnapshot ->
-            classItems.clear()  // Clear the list before adding items to avoid duplicates
+            classItems.clear()
             for (document in querySnapshot) {
-                val crsName = document.getString("Course Name") ?: "Unknown Course"
-                val secName = document.getString("Section Name") ?: "Unknown Section"
+                val crsName = document.getString("Course Name") ?: ""
+                val secName = document.getString("Section Name") ?: ""
                 classItems.add(ClassItem(crsName, secName))
             }
-            classAdapter.notifyDataSetChanged() // Update the RecyclerView with new data
+            classAdapter.notifyDataSetChanged()
         }.addOnFailureListener { exception ->
             Log.w("MainActivity", "Error getting documents: ", exception)
             Toast.makeText(this, "Failed to load classrooms", Toast.LENGTH_SHORT).show()
@@ -115,11 +111,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addClass(crsName: String, secName: String) {
-        // Add new class to local list and notify adapter
         val newClassItem = ClassItem(crsName, secName)
         classItems.add(newClassItem)
         classAdapter.notifyDataSetChanged()
-
         val newClassroom = hashMapOf("Course Name" to crsName, "Section Name" to secName)
         val classroomId = "$crsName-$secName"
         classroomRef.document(classroomId).set(newClassroom).addOnSuccessListener {

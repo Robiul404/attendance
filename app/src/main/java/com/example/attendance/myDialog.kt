@@ -12,12 +12,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 
 class myDialog : DialogFragment() {
+
     companion object {
         const val CLASS_ADD_DIALOG = "addclass"
         const val STUDENT_ADD_DIALOG = "addstudent"
-        fun setListener(myDialog: myDialog, listener: OnClickListener) {
-            myDialog.listener= listener
-        }
     }
 
     private var listener: OnClickListener? = null
@@ -50,8 +48,8 @@ class myDialog : DialogFragment() {
 
         val idEdt: EditText = view.findViewById(R.id.edt01)
         val nameEdt: EditText = view.findViewById(R.id.edt02)
-        idEdt.setHint("582")
-        nameEdt.setHint("Robiul Islam")
+        idEdt.hint = "582"
+        nameEdt.hint = "Robiul Islam"
 
         val cancel: Button = view.findViewById(R.id.cancel_btn)
         val add: Button = view.findViewById(R.id.add_btn)
@@ -87,6 +85,4 @@ class myDialog : DialogFragment() {
             dismiss()
         }
     }
-
-
 }

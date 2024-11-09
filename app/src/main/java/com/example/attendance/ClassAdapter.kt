@@ -16,7 +16,7 @@ class ClassAdapter(
     private lateinit var onItemClickListener: OnItemClickListener
 
     interface OnItemClickListener {
-        fun onClick(position: Int)  // Abstract function
+        fun onClick(position: Int)
     }
 
     fun setOnItemClickListener(onItemClickListener: OnItemClickListener) {
